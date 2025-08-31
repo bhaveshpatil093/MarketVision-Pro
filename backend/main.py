@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 
 from app.config import settings
-from app.database.influx_client import InfluxDBClient
+from app.database.influx_client import InfluxDBClientWrapper
 from app.database.redis_client import RedisClient
 from app.websocket.manager import WebSocketManager
 from app.market_data.processors.market_data_processor import MarketDataProcessor
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 # Global instances
 websocket_manager = WebSocketManager()
-influx_client = InfluxDBClient()
+influx_client = InfluxDBClientWrapper()
 redis_client = RedisClient()
 market_data_processor = MarketDataProcessor()
 
@@ -43,6 +43,11 @@ async def lifespan(app: FastAPI):
     # Initialize database connections
     await influx_client.connect()
     await redis_client.connect()
+    
+    # Set up market data processor connections
+    await market_data_processor.set_influx_client(influx_client)
+    await market_data_processor.set_redis_client(redis_client)
+    await market_data_processor.set_websocket_manager(websocket_manager)
     
     # Start market data processor
     asyncio.create_task(market_data_processor.start())

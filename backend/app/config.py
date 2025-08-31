@@ -17,6 +17,12 @@ class Settings(BaseSettings):
     
     # API Keys
     ALPHA_VANTAGE_API_KEY: Optional[str] = Field(default=None, env="ALPHA_VANTAGE_API_KEY")
+    EODHD_API_KEY: Optional[str] = Field(default=None, env="EODHD_API_KEY")
+    POLYGON_API_KEY: Optional[str] = Field(default=None, env="POLYGON_API_KEY")
+    ALPACA_API_KEY: Optional[str] = Field(default=None, env="ALPACA_API_KEY")
+    ALPACA_SECRET_KEY: Optional[str] = Field(default=None, env="ALPACA_SECRET_KEY")
+    FINNHUB_API_KEY: Optional[str] = Field(default=None, env="FINNHUB_API_KEY")
+    TWELVE_DATA_API_KEY: Optional[str] = Field(default=None, env="TWELVE_DATA_API_KEY")
     IEX_CLOUD_API_KEY: Optional[str] = Field(default=None, env="IEX_CLOUD_API_KEY")
     BINANCE_API_KEY: Optional[str] = Field(default=None, env="BINANCE_API_KEY")
     BINANCE_SECRET_KEY: Optional[str] = Field(default=None, env="BINANCE_SECRET_KEY")

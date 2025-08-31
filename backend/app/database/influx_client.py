@@ -16,7 +16,7 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-class InfluxDBClient:
+class InfluxDBClientWrapper:
     """InfluxDB client for market data storage"""
     
     def __init__(self):
@@ -44,11 +44,12 @@ class InfluxDBClient:
                 self.query_api = self.client.query_api()
                 logger.info("Successfully connected to InfluxDB")
             else:
-                raise ConnectionError("InfluxDB health check failed")
+                logger.warning("InfluxDB health check failed, running in mock mode")
+                self.client = None
                 
         except Exception as e:
-            logger.error(f"Failed to connect to InfluxDB: {e}")
-            raise
+            logger.warning(f"Failed to connect to InfluxDB: {e}, running in mock mode")
+            self.client = None
     
     async def disconnect(self):
         """Disconnect from InfluxDB"""

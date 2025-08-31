@@ -39,8 +39,8 @@ class RedisClient:
             logger.info("Successfully connected to Redis")
             
         except Exception as e:
-            logger.error(f"Failed to connect to Redis: {e}")
-            raise
+            logger.warning(f"Failed to connect to Redis: {e}, running in mock mode")
+            self.client = None
     
     async def disconnect(self):
         """Disconnect from Redis"""

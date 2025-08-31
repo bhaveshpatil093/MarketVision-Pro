@@ -15,6 +15,8 @@ from app.websocket.manager import WebSocketManager
 from app.market_data.providers.alpha_vantage import AlphaVantageProvider
 from app.market_data.providers.iex_cloud import IEXCloudProvider
 from app.market_data.providers.yahoo_finance import YahooFinanceProvider
+from app.market_data.providers.eodhd import EODHDProvider
+from app.market_data.providers.polygon import PolygonProvider
 from app.market_data.processors.technical_indicators import TechnicalIndicators
 from app.market_data.processors.anomaly_detector import AnomalyDetector
 
@@ -32,6 +34,8 @@ class MarketDataProcessor:
         self.alpha_vantage = AlphaVantageProvider()
         self.iex_cloud = IEXCloudProvider()
         self.yahoo_finance = YahooFinanceProvider()
+        self.eodhd = EODHDProvider()
+        self.polygon = PolygonProvider()
         
         # Processors
         self.technical_indicators = TechnicalIndicators()
@@ -158,9 +162,11 @@ class MarketDataProcessor:
         try:
             # Try different providers in order of preference
             providers = [
-                (self.iex_cloud, "IEX Cloud"),
+                (self.polygon, "Polygon.io"),
+                (self.eodhd, "EODHD"),
+                (self.yahoo_finance, "Yahoo Finance"),
                 (self.alpha_vantage, "Alpha Vantage"),
-                (self.yahoo_finance, "Yahoo Finance")
+                (self.iex_cloud, "IEX Cloud")
             ]
             
             for provider, provider_name in providers:
