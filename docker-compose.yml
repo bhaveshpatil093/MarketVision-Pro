@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:2.7
+    container_name: marketvision_influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminpassword123
+      - DOCKER_INFLUXDB_INIT_ORG=marketvision
+      - DOCKER_INFLUXDB_INIT_BUCKET=market_data
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=admin_token_123
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    networks:
+      - marketvision_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: marketvision_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - marketvision_network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: marketvision_grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - marketvision_network
+    depends_on:
+      - influxdb
+
+volumes:
+  influxdb_data:
+  redis_data:
+  grafana_data:
+
+networks:
+  marketvision_network:
+    driver: bridge

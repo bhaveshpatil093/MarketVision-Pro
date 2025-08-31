@@ -1,0 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-dark-bg text-dark-text;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  * {
+    @apply border-dark-border;
+  }
+}
+
+@layer components {
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-dark-card;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-dark-border rounded-full;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-dark-text-secondary;
+  }
+  
+  /* Market data specific styles */
+  .price-up {
+    @apply text-market-up;
+  }
+  
+  .price-down {
+    @apply text-market-down;
+  }
+  
+  .price-neutral {
+    @apply text-market-neutral;
+  }
+  
+  .price-alert {
+    @apply text-market-alert;
+  }
+  
+  .price-info {
+    @apply text-market-info;
+  }
+  
+  /* Card styles */
+  .market-card {
+    @apply bg-dark-card border border-dark-border rounded-lg p-4 shadow-lg;
+  }
+  
+  .market-card-hover {
+    @apply hover:border-dark-accent hover:shadow-xl transition-all duration-200;
+  }
+  
+  /* Button styles */
+  .btn-primary {
+    @apply bg-dark-accent hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-dark-card hover:bg-dark-border text-dark-text border border-dark-border font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-danger {
+    @apply bg-market-down hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  /* Input styles */
+  .input-field {
+    @apply bg-dark-card border border-dark-border text-dark-text placeholder-dark-text-secondary rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-dark-accent focus:border-transparent;
+  }
+  
+  /* Table styles */
+  .market-table {
+    @apply w-full border-collapse;
+  }
+  
+  .market-table th {
+    @apply bg-dark-card text-dark-text-secondary font-medium text-left py-3 px-4 border-b border-dark-border;
+  }
+  
+  .market-table td {
+    @apply py-3 px-4 border-b border-dark-border;
+  }
+  
+  .market-table tr:hover {
+    @apply bg-dark-card/50;
+  }
+  
+  /* Chart container styles */
+  .chart-container {
+    @apply bg-dark-card border border-dark-border rounded-lg p-4;
+  }
+  
+  /* Loading spinner */
+  .loading-spinner {
+    @apply animate-spin rounded-full border-2 border-dark-border border-t-dark-accent;
+  }
+  
+  /* Status indicators */
+  .status-indicator {
+    @apply w-2 h-2 rounded-full;
+  }
+  
+  .status-online {
+    @apply bg-market-up;
+  }
+  
+  .status-offline {
+    @apply bg-market-down;
+  }
+  
+  .status-warning {
+    @apply bg-market-alert;
+  }
+  
+  /* Grid layouts */
+  .market-grid {
+    @apply grid grid-cols-market gap-4;
+  }
+  
+  .chart-grid {
+    @apply grid grid-cols-charts gap-6;
+  }
+  
+  /* Responsive text sizes */
+  .text-responsive {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+  
+  /* Glassmorphism effect */
+  .glass {
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
+  }
+  
+  /* Gradient backgrounds */
+  .gradient-bg {
+    @apply bg-gradient-to-br from-dark-bg via-dark-card to-dark-border;
+  }
+  
+  /* Pulse animation for real-time updates */
+  .pulse-update {
+    @apply animate-pulse-slow;
+  }
+  
+  /* Fade in animation */
+  .fade-in {
+    @apply animate-fade-in;
+  }
+  
+  /* Slide up animation */
+  .slide-up {
+    @apply animate-slide-up;
+  }
+}
+
+@layer utilities {
+  /* Custom utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Market data formatting */
+  .price-format {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  /* Performance optimizations */
+  .will-change-transform {
+    will-change: transform;
+  }
+  
+  .will-change-opacity {
+    will-change: opacity;
+  }
+}
