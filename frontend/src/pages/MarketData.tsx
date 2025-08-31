@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
-  Search, 
-  Filter, 
-  Download, 
-  RefreshCw, 
+  BarChart3, 
   TrendingUp, 
-  TrendingDown,
-  BarChart3,
-  Clock,
-  Activity
+  TrendingDown, 
+  Activity,
+  RefreshCw
 } from 'lucide-react';
-
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useConnectionStatus } from '../hooks/useConnectionStatus';
 import SymbolSearch from '../components/MarketData/SymbolSearch';
@@ -20,10 +15,9 @@ import TimeSales from '../components/MarketData/TimeSales';
 import TechnicalIndicators from '../components/MarketData/TechnicalIndicators';
 
 const MarketData: React.FC = () => {
-  const { isConnected, latency } = useWebSocket();
-  const { isOnline } = useConnectionStatus();
+  const { isConnected, latency, isMockMode } = useWebSocket();
   const [selectedSymbol, setSelectedSymbol] = useState('AAPL');
-  const [timeframe, setTimeframe] = useState<'1m' | '5m' | '15m' | '1h' | '1d'>('5m');
+  const [timeframe, setTimeframe] = useState('1D');
   const [viewMode, setViewMode] = useState<'chart' | 'orderbook' | 'timesales'>('chart');
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +32,7 @@ const MarketData: React.FC = () => {
   const viewModes = [
     { value: 'chart', label: 'Chart', icon: BarChart3 },
     { value: 'orderbook', label: 'Order Book', icon: Activity },
-    { value: 'timesales', label: 'Time & Sales', icon: Clock }
+    { value: 'timesales', label: 'Time & Sales', icon: RefreshCw }
   ];
 
   const handleSymbolChange = (symbol: string) => {
@@ -77,23 +71,29 @@ const MarketData: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-dark-text">Market Data</h1>
           <p className="text-dark-text-secondary mt-2">
-            Real-time market data, charts, and order book analysis
+            {isMockMode ? 'High-quality simulated market data and analysis' : 'Real-time market data, charts, and order book analysis'}
           </p>
         </div>
         
         {/* Connection Status */}
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-market-up' : 'bg-market-down'}`}></div>
-            <span className={`text-sm font-medium ${isConnected ? 'text-market-up' : 'text-market-down'}`}>
-              {isConnected ? 'Connected' : 'Disconnected'}
+            <div className={`w-2 h-2 rounded-full ${
+              isMockMode ? 'bg-market-alert' :
+              isConnected ? 'bg-market-up' : 'bg-market-down'
+            }`}></div>
+            <span className={`text-sm font-medium ${
+              isMockMode ? 'text-market-alert' :
+              isConnected ? 'text-market-up' : 'text-market-down'
+            }`}>
+              {isMockMode ? 'Simulated Mode' : isConnected ? 'Connected' : 'Disconnected'}
             </span>
           </div>
           
-          {isConnected && (
+          {(isConnected || isMockMode) && (
             <div className="flex items-center space-x-2 text-sm text-dark-text-secondary">
-              <Clock className="w-4 h-4" />
-              <span>{latency}ms</span>
+              <RefreshCw className="w-4 h-4" />
+              <span>{latency}ms {isMockMode && '(simulated)'}</span>
             </div>
           )}
         </div>
@@ -117,7 +117,7 @@ const MarketData: React.FC = () => {
               onClick={handleExport}
               className="btn-secondary flex items-center space-x-2"
             >
-              <Download className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4" />
               <span>Export</span>
             </button>
           </div>
@@ -135,7 +135,7 @@ const MarketData: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-dark-text">Timeframe</h3>
           <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-dark-text-secondary" />
+            <RefreshCw className="w-4 h-4 text-dark-text-secondary" />
             <span className="text-sm text-dark-text-secondary">Select interval</span>
           </div>
         </div>
@@ -204,11 +204,11 @@ const MarketData: React.FC = () => {
             </div>
           ) : (
             <>
+              {/* Chart Area */}
               {viewMode === 'chart' && (
-                <PriceChart
-                  symbol={selectedSymbol}
+                <PriceChart 
+                  symbol={selectedSymbol} 
                   timeframe={timeframe}
-                  isConnected={isConnected}
                 />
               )}
               

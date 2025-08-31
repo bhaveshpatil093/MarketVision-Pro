@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
-  TrendingDown, 
-  AlertTriangle, 
-  Brain,
-  Shield,
-  Target,
+  Brain, 
   Activity,
-  PieChart,
+  RefreshCw,
+  Shield,
+  AlertTriangle,
   LineChart,
-  Zap
+  Zap,
+  Target
 } from 'lucide-react';
-
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useConnectionStatus } from '../hooks/useConnectionStatus';
 import RiskMetrics from '../components/Analytics/RiskMetrics';
@@ -23,15 +21,15 @@ import CorrelationMatrix from '../components/Analytics/CorrelationMatrix';
 const Analytics: React.FC = () => {
   const { isConnected, latency } = useWebSocket();
   const { isOnline } = useConnectionStatus();
-  const [activeTab, setActiveTab] = useState<'overview' | 'risk' | 'portfolio' | 'ai' | 'correlation'>('overview');
+  const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
-    { id: 'risk', label: 'Risk Metrics', icon: Shield },
-    { id: 'portfolio', label: 'Portfolio', icon: PieChart },
+    { id: 'risk', label: 'Risk Metrics', icon: RefreshCw },
+    { id: 'portfolio', label: 'Portfolio', icon: RefreshCw },
     { id: 'ai', label: 'AI Insights', icon: Brain },
-    { id: 'correlation', label: 'Correlation', icon: LineChart }
+    { id: 'correlation', label: 'Correlation', icon: RefreshCw }
   ];
 
   const handleTabChange = (tabId: string) => {

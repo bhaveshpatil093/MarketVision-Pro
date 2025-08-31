@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, 
   TrendingDown, 
-  BarChart3, 
   Activity, 
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Info,
+  RefreshCw,
   Settings,
-  RefreshCw
+  CheckCircle,
+  Info,
+  XCircle,
+  BarChart3
 } from 'lucide-react';
 
 interface TechnicalIndicatorsProps {

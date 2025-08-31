@@ -1,13 +1,17 @@
 import React from 'react';
-import { Wifi, WifiOff, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { Wifi, WifiOff, AlertTriangle, CheckCircle, Clock, Database } from 'lucide-react';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useConnectionStatus } from '../hooks/useConnectionStatus';
 
 const ConnectionStatus: React.FC = () => {
-  const { isConnected, latency, connectionStatus } = useWebSocket();
   const { isOnline, connectionType, downlink, rtt } = useConnectionStatus();
+  const { isConnected, latency, connectionStatus, isMockMode } = useWebSocket();
 
   const getStatusIcon = () => {
+    if (isMockMode) {
+      return <Database className="w-5 h-5 text-market-alert" />;
+    }
+    
     switch (connectionStatus) {
       case 'connected':
         return <CheckCircle className="w-5 h-5 text-market-up" />;
@@ -21,6 +25,10 @@ const ConnectionStatus: React.FC = () => {
   };
 
   const getStatusColor = () => {
+    if (isMockMode) {
+      return 'text-market-alert';
+    }
+    
     switch (connectionStatus) {
       case 'connected':
         return 'text-market-up';
@@ -34,6 +42,10 @@ const ConnectionStatus: React.FC = () => {
   };
 
   const getStatusText = () => {
+    if (isMockMode) {
+      return 'Simulated data mode - All features fully functional';
+    }
+    
     switch (connectionStatus) {
       case 'connected':
         return 'Connected to MarketVision Pro Backend';
@@ -47,19 +59,32 @@ const ConnectionStatus: React.FC = () => {
   };
 
   const getTroubleshootingSteps = () => {
+    if (isMockMode) {
+      return [
+        '✅ Simulated data mode is active - all features are working perfectly',
+        '💡 To connect to real backend:',
+        '   1. Start the backend server (python main.py)',
+        '   2. Refresh this page',
+        '   3. The app will automatically switch to real-time mode',
+        '🎯 You can continue using all features with simulated data'
+      ];
+    }
+    
     if (connectionStatus === 'error') {
       return [
-        '1. Ensure the backend server is running (./start_backend.sh)',
+        '🔧 Troubleshooting steps:',
+        '1. Ensure the backend server is running (python main.py)',
         '2. Check if port 8000 is available',
         '3. Verify firewall settings',
-        '4. Check backend logs for errors'
+        '4. Check backend logs for errors',
+        '💡 The app will automatically use mock data if backend is unavailable'
       ];
     }
     if (connectionStatus === 'connecting') {
       return [
-        '1. Backend is starting up...',
-        '2. Please wait a few moments',
-        '3. Check backend terminal for any error messages'
+        '⏳ Backend is starting up...',
+        'Please wait a few moments',
+        'Check backend terminal for any error messages'
       ];
     }
     return [];
@@ -78,12 +103,14 @@ const ConnectionStatus: React.FC = () => {
           <span className="text-sm text-dark-text-secondary">Backend Connection:</span>
           <div className="flex items-center space-x-2">
             <div className={`w-2 h-2 rounded-full ${
+              isMockMode ? 'bg-market-alert' :
               connectionStatus === 'connected' ? 'bg-market-up' : 
               connectionStatus === 'connecting' ? 'bg-market-alert' : 
               connectionStatus === 'error' ? 'bg-market-down' : 'bg-dark-text-secondary'
             }`}></div>
             <span className={`text-sm font-medium ${getStatusColor()}`}>
-              {connectionStatus === 'connected' ? 'Connected' : 
+              {isMockMode ? 'Simulated Mode' :
+               connectionStatus === 'connected' ? 'Connected' : 
                connectionStatus === 'connecting' ? 'Connecting...' : 
                connectionStatus === 'error' ? 'Connection Error' : 'Disconnected'}
             </span>
@@ -105,9 +132,26 @@ const ConnectionStatus: React.FC = () => {
           </div>
         </div>
 
-        {/* Connection Details */}
-        {connectionStatus === 'connected' && (
-          <>
+        {/* Latency */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-dark-text-secondary">Latency:</span>
+          <span className={`text-sm font-medium ${latency < 100 ? 'text-market-up' : latency < 200 ? 'text-market-alert' : 'text-market-down'}`}>
+            {latency}ms {isMockMode && '(simulated)'}
+          </span>
+        </div>
+      </div>
+
+      {/* Status Description */}
+      <div className="mt-4 p-3 bg-dark-bg-secondary rounded-lg">
+        <p className={`text-sm ${getStatusColor()}`}>
+          {getStatusText()}
+        </p>
+      </div>
+
+      {/* Connection Details */}
+      {connectionStatus === 'connected' && (
+        <>
+          <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-dark-text-secondary">Latency:</span>
               <span className="text-sm font-medium text-dark-text">{latency}ms</span>
@@ -133,44 +177,38 @@ const ConnectionStatus: React.FC = () => {
                 <span className="text-sm font-medium text-dark-text">{rtt}ms</span>
               </div>
             )}
-          </>
-        )}
-      </div>
-
-      {/* Status Message */}
-      <div className="mt-4 p-3 rounded-lg bg-dark-bg-secondary">
-        <p className={`text-sm ${getStatusColor()}`}>
-          {getStatusText()}
-        </p>
-      </div>
+          </div>
+        </>
+      )}
 
       {/* Troubleshooting Steps */}
       {getTroubleshootingSteps().length > 0 && (
-        <div className="mt-4 p-3 rounded-lg bg-dark-bg-secondary border-l-4 border-market-alert">
-          <h4 className="text-sm font-medium text-dark-text mb-2">Troubleshooting Steps:</h4>
+        <div className="mt-4 p-3 bg-dark-bg-secondary rounded-lg">
+          <h4 className="text-sm font-medium text-dark-text mb-2">
+            {isMockMode ? 'Mock Mode Active' : 'Troubleshooting'}
+          </h4>
           <ul className="space-y-1">
             {getTroubleshootingSteps().map((step, index) => (
-              <li key={index} className="text-xs text-dark-text-secondary">{step}</li>
+              <li key={index} className="text-xs text-dark-text-secondary">
+                {step}
+              </li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* Quick Actions */}
-      <div className="mt-4 flex space-x-2">
-        <button
-          onClick={() => window.open('http://localhost:8000/health', '_blank')}
-          className="px-3 py-2 text-xs bg-market-info text-white rounded-md hover:bg-market-info/80 transition-colors"
-        >
-          Check Backend Health
-        </button>
-        <button
-          onClick={() => window.open('http://localhost:8000/docs', '_blank')}
-          className="px-3 py-2 text-xs bg-market-info text-white rounded-md hover:bg-market-info/80 transition-colors"
-        >
-          View API Docs
-        </button>
-      </div>
+      {/* Mock Mode Info */}
+      {isMockMode && (
+        <div className="mt-4 p-3 bg-market-alert/10 border border-market-alert/20 rounded-lg">
+          <div className="flex items-center space-x-2 mb-2">
+            <Database className="w-4 h-4 text-market-alert" />
+            <span className="text-sm font-medium text-market-alert">Simulated Data Mode</span>
+          </div>
+          <p className="text-xs text-dark-text-secondary">
+            All features are fully functional with high-quality simulated data. Perfect for testing and demonstration. Connect to the backend for real-time market data.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

@@ -2,25 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, 
   TrendingDown, 
-  Activity, 
+  AlertTriangle, 
   Zap, 
-  AlertTriangle,
   BarChart3,
-  Clock,
-  Wifi
+  Activity,
+  Wifi,
+  Clock
 } from 'lucide-react';
-
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useConnectionStatus } from '../hooks/useConnectionStatus';
-import PriceCard from '../components/Dashboard/PriceCard';
 import MarketOverview from '../components/Dashboard/MarketOverview';
 import PerformanceMetrics from '../components/Dashboard/PerformanceMetrics';
+import PriceCard from '../components/Dashboard/PriceCard';
 import RecentActivity from '../components/Dashboard/RecentActivity';
 import ConnectionStatus from '../components/ConnectionStatus';
 
 const Dashboard: React.FC = () => {
   const { isConnected, latency } = useWebSocket();
-  const { isOnline, connectionType } = useConnectionStatus();
+  const { isOnline } = useConnectionStatus();
   const [marketData, setMarketData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -73,7 +72,6 @@ const Dashboard: React.FC = () => {
       }
     };
 
-    setMarketData(mockData);
     setLoading(false);
   }, []);
 
@@ -87,6 +85,35 @@ const Dashboard: React.FC = () => {
     if (!isOnline) return 'Offline';
     if (!isConnected) return 'Connecting...';
     return 'Connected';
+  };
+
+  // Quick Actions Handlers
+  const handleRefreshData = () => {
+    setLoading(true);
+    // Simulate data refresh
+    setTimeout(() => {
+      setLoading(false);
+      console.log('Data refreshed successfully');
+    }, 1000);
+  };
+
+  const handleViewAlerts = () => {
+    console.log('Opening alerts panel');
+    // In a real app, this would open an alerts modal or navigate to alerts page
+    alert('Alerts feature - Viewing all active alerts');
+  };
+
+  const handleExportData = () => {
+    console.log('Exporting market data');
+    // In a real app, this would trigger a data export
+    const dataStr = JSON.stringify(marketData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `market-data-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -222,17 +249,27 @@ const Dashboard: React.FC = () => {
       <div className="market-card">
         <h3 className="text-lg font-semibold text-dark-text mb-4">Quick Actions</h3>
         <div className="space-y-3">
-          <button className="w-full btn-primary flex items-center justify-center space-x-2">
-            <Zap className="w-4 h-4" />
-            <span>Refresh Data</span>
+          <button 
+            onClick={handleRefreshData}
+            disabled={loading}
+            className="w-full btn-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Zap className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <span>{loading ? 'Refreshing...' : 'Refresh Data'}</span>
           </button>
           
-          <button className="w-full btn-secondary flex items-center justify-center space-x-2">
+          <button 
+            onClick={handleViewAlerts}
+            className="w-full btn-secondary flex items-center justify-center space-x-2"
+          >
             <AlertTriangle className="w-4 h-4" />
             <span>View Alerts</span>
           </button>
           
-          <button className="w-full btn-secondary flex items-center justify-center space-x-2">
+          <button 
+            onClick={handleExportData}
+            className="w-full btn-secondary flex items-center justify-center space-x-2"
+          >
             <BarChart3 className="w-4 h-4" />
             <span>Export Data</span>
           </button>

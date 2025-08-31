@@ -20,10 +20,10 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { isOnline } = useConnectionStatus();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const { isConnected, latency, connectionStatus } = useWebSocket();
-  const { isOnline } = useConnectionStatus();
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: BarChart3 },

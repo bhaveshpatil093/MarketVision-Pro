@@ -1,20 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Settings as SettingsIcon, 
-  User, 
-  Shield, 
-  Bell, 
-  Palette, 
-  Database,
-  Wifi,
-  Save,
+  Save, 
+  RotateCcw, 
+  Download, 
+  Upload,
   RefreshCw,
-  Eye,
-  EyeOff,
-  Download,
-  Upload
+  Palette,
+  Bell,
+  Database,
+  Shield,
+  Wifi
 } from 'lucide-react';
-
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useConnectionStatus } from '../hooks/useConnectionStatus';
 
@@ -22,7 +19,6 @@ const Settings: React.FC = () => {
   const { isConnected, latency } = useWebSocket();
   const { isOnline } = useConnectionStatus();
   const [activeTab, setActiveTab] = useState<'general' | 'appearance' | 'notifications' | 'data' | 'security' | 'advanced'>('general');
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const tabs = [
@@ -96,22 +92,111 @@ const Settings: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     setSaving(false);
     // Show success message
-    console.log('Settings saved successfully');
+    alert('Settings saved successfully!');
   };
 
   const handleReset = () => {
     // Reset to default settings
-    console.log('Settings reset to defaults');
+    if (window.confirm('Are you sure you want to reset all settings to defaults?')) {
+      setGeneralSettings({
+        autoRefresh: true,
+        refreshInterval: 5000,
+        defaultTimeframe: '5m',
+        maxSymbols: 50,
+        enableSounds: false,
+        enableHaptic: false
+      });
+      setAppearanceSettings({
+        theme: 'dark',
+        fontSize: 'medium',
+        chartTheme: 'dark',
+        showGrid: true,
+        showAnimations: true,
+        compactMode: false
+      });
+      setNotificationSettings({
+        priceAlerts: true,
+        volumeSpikes: true,
+        anomalyDetection: true,
+        systemAlerts: true,
+        emailNotifications: false,
+        pushNotifications: true
+      });
+      setDataSettings({
+        dataRetention: 30,
+        maxDataPoints: 10000,
+        enableCompression: true,
+        backupFrequency: 'daily',
+        exportFormat: 'csv'
+      });
+      setSecuritySettings({
+        twoFactorAuth: false,
+        sessionTimeout: 3600,
+        requirePassword: true,
+        logActivity: true,
+        encryptData: true
+      });
+      setAdvancedSettings({
+        enableDebug: false,
+        logLevel: 'info',
+        maxConnections: 100,
+        enableMetrics: true,
+        autoOptimize: true
+      });
+      alert('Settings reset to defaults!');
+    }
   };
 
   const handleExport = () => {
     // Export settings
-    console.log('Exporting settings');
+    const settingsData = {
+      general: generalSettings,
+      appearance: appearanceSettings,
+      notifications: notificationSettings,
+      data: dataSettings,
+      security: securitySettings,
+      advanced: advancedSettings,
+      exportedAt: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(settingsData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `marketvision-settings-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    alert('Settings exported successfully!');
   };
 
   const handleImport = () => {
     // Import settings
-    console.log('Importing settings');
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const settingsData = JSON.parse(e.target?.result as string);
+            if (settingsData.general) setGeneralSettings(settingsData.general);
+            if (settingsData.appearance) setAppearanceSettings(settingsData.appearance);
+            if (settingsData.notifications) setNotificationSettings(settingsData.notifications);
+            if (settingsData.data) setDataSettings(settingsData.data);
+            if (settingsData.security) setSecuritySettings(settingsData.security);
+            if (settingsData.advanced) setAdvancedSettings(settingsData.advanced);
+            alert('Settings imported successfully!');
+          } catch (error) {
+            alert('Error importing settings. Please check the file format.');
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
   };
 
   return (
@@ -628,7 +713,7 @@ const Settings: React.FC = () => {
                 onClick={handleReset}
                 className="w-full btn-secondary flex items-center justify-center space-x-2"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RotateCcw className="w-4 h-4" />
                 <span>Reset to Defaults</span>
               </button>
               

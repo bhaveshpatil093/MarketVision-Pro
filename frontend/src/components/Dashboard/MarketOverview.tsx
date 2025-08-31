@@ -25,7 +25,6 @@ const MarketOverview: React.FC<MarketOverviewProps> = ({ data }) => {
   };
 
   const getMarketSentiment = () => {
-    const total = symbols.length;
     const upCount = gainers.length;
     const downCount = losers.length;
     

@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Bell, 
-  TrendingUp, 
+  Activity, 
   TrendingDown, 
-  AlertTriangle, 
-  Info,
-  Clock,
-  Zap
+  TrendingUp
 } from 'lucide-react';
 
 interface ActivityItem {
@@ -89,15 +85,15 @@ const RecentActivity: React.FC = () => {
       case 'price_alert':
         return <TrendingDown className="w-4 h-4 text-market-down" />;
       case 'volume_spike':
-        return <Zap className="w-4 h-4 text-market-alert" />;
+        return <Activity className="w-4 h-4 text-market-alert" />;
       case 'anomaly':
-        return <AlertTriangle className="w-4 h-4 text-market-down" />;
+        return <Activity className="w-4 h-4 text-market-down" />;
       case 'system':
-        return <Info className="w-4 h-4 text-market-info" />;
+        return <Activity className="w-4 h-4 text-market-info" />;
       case 'news':
-        return <Bell className="w-4 h-4 text-market-up" />;
+        return <Activity className="w-4 h-4 text-market-up" />;
       default:
-        return <Info className="w-4 h-4 text-dark-text-secondary" />;
+        return <Activity className="w-4 h-4 text-dark-text-secondary" />;
     }
   };
 
@@ -161,7 +157,7 @@ const RecentActivity: React.FC = () => {
     <div className="market-card">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <Bell className="w-5 h-5 text-market-info" />
+          <Activity className="w-5 h-5 text-market-info" />
           <h3 className="text-lg font-semibold text-dark-text">Recent Activity</h3>
           {unreadCount > 0 && (
             <span className="bg-market-down text-white text-xs px-2 py-1 rounded-full">
@@ -197,7 +193,7 @@ const RecentActivity: React.FC = () => {
       <div className="space-y-3 max-h-96 overflow-y-auto">
         {filteredActivities.length === 0 ? (
           <div className="text-center py-8 text-dark-text-secondary">
-            <Clock className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>No activities to show</p>
           </div>
         ) : (

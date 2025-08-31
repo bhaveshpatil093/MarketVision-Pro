@@ -70,7 +70,7 @@ const SymbolSearch: React.FC<SymbolSearchProps> = ({
       symbol.name.toLowerCase().includes(query)
     );
     setFilteredSymbols(filtered);
-  }, [searchQuery]);
+  }, [searchQuery, popularSymbols]);
 
   // Handle click outside search
   useEffect(() => {

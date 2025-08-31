@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
-  Activity, 
-  Clock, 
-  Zap, 
+  BarChart3, 
   TrendingUp, 
   TrendingDown, 
-  AlertTriangle,
-  Settings,
+  Activity,
   RefreshCw,
-  BarChart3,
+  Settings,
+  Zap,
   Cpu,
   HardDrive,
   Wifi,
-  MemoryStick
+  MemoryStick,
+  Clock,
+  AlertTriangle
 } from 'lucide-react';
-
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useConnectionStatus } from '../hooks/useConnectionStatus';
 import SystemMetrics from '../components/Performance/SystemMetrics';
@@ -24,8 +23,7 @@ import OptimizationTools from '../components/Performance/OptimizationTools';
 
 const Performance: React.FC = () => {
   const { isConnected, latency } = useWebSocket();
-  const { isOnline } = useConnectionStatus();
-  const [activeTab, setActiveTab] = useState<'overview' | 'system' | 'database' | 'websocket' | 'optimization'>('overview');
+  const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
 
   const tabs = [
@@ -41,6 +39,25 @@ const Performance: React.FC = () => {
     setLoading(true);
     // Simulate loading
     setTimeout(() => setLoading(false), 500);
+  };
+
+  // Quick Actions Handlers
+  const handleRunPerformanceTest = () => {
+    console.log('Running performance test...');
+    // In a real app, this would trigger a comprehensive performance test
+    alert('Performance test started. Results will be available in 2-3 minutes.');
+  };
+
+  const handleOptimizeSettings = () => {
+    console.log('Opening optimization settings...');
+    // In a real app, this would open optimization configuration
+    alert('Opening optimization settings panel...');
+  };
+
+  const handleClearCache = () => {
+    console.log('Clearing cache...');
+    // In a real app, this would clear various caches
+    alert('Cache cleared successfully!');
   };
 
   return (
@@ -217,17 +234,26 @@ const Performance: React.FC = () => {
                 <div className="market-card">
                   <h3 className="text-lg font-semibold text-dark-text mb-4">Quick Actions</h3>
                   <div className="space-y-3">
-                    <button className="w-full btn-primary flex items-center justify-center space-x-2">
+                    <button 
+                      onClick={handleRunPerformanceTest}
+                      className="w-full btn-primary flex items-center justify-center space-x-2"
+                    >
                       <Zap className="w-4 h-4" />
                       <span>Run Performance Test</span>
                     </button>
                     
-                    <button className="w-full btn-secondary flex items-center justify-center space-x-2">
+                    <button 
+                      onClick={handleOptimizeSettings}
+                      className="w-full btn-secondary flex items-center justify-center space-x-2"
+                    >
                       <Settings className="w-4 h-4" />
                       <span>Optimize Settings</span>
                     </button>
                     
-                    <button className="w-full btn-secondary flex items-center justify-center space-x-2">
+                    <button 
+                      onClick={handleClearCache}
+                      className="w-full btn-secondary flex items-center justify-center space-x-2"
+                    >
                       <RefreshCw className="w-4 h-4" />
                       <span>Clear Cache</span>
                     </button>

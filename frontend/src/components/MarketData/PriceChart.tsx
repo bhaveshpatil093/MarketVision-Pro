@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
   Settings, 
   Download,
-  Eye,
-  EyeOff
+  RefreshCw
 } from 'lucide-react';
+import {
+  LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart
+} from 'recharts';
+import { useWebSocket } from '../../hooks/useWebSocket';
 
 interface PriceChartProps {
   symbol: string;
   timeframe: string;
-  isConnected: boolean;
 }
 
 interface CandleData {
@@ -22,14 +22,16 @@ interface CandleData {
   low: number;
   close: number;
   volume: number;
+  date: string;
 }
 
-const PriceChart: React.FC<PriceChartProps> = ({ symbol, timeframe, isConnected }) => {
+const PriceChart: React.FC<PriceChartProps> = ({ symbol, timeframe }) => {
+  const { isConnected, latency, isMockMode } = useWebSocket();
   const [chartData, setChartData] = useState<CandleData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showVolume, setShowVolume] = useState(true);
-  const [showIndicators, setShowIndicators] = useState(true);
   const [chartType, setChartType] = useState<'candlestick' | 'line' | 'area'>('candlestick');
+  const [showVolume, setShowVolume] = useState(true);
+  const [showIndicators, setShowIndicators] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Generate mock candlestick data
   useEffect(() => {
@@ -50,6 +52,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ symbol, timeframe, isConnected 
         const high = Math.max(open, close) + Math.random() * volatility;
         const low = Math.min(open, close) - Math.random() * volatility;
         const volume = Math.floor(Math.random() * 1000000) + 100000;
+        const date = new Date(now - i * interval);
         
         mockData.push({
           timestamp: now - i * interval,
@@ -57,7 +60,8 @@ const PriceChart: React.FC<PriceChartProps> = ({ symbol, timeframe, isConnected 
           high: parseFloat(high.toFixed(2)),
           low: parseFloat(low.toFixed(2)),
           close: parseFloat(close.toFixed(2)),
-          volume
+          volume,
+          date: date.toLocaleTimeString()
         });
       }
       
@@ -115,6 +119,23 @@ const PriceChart: React.FC<PriceChartProps> = ({ symbol, timeframe, isConnected 
     return volume.toString();
   };
 
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-dark-card border border-dark-border rounded-lg p-3 shadow-lg">
+          <p className="text-dark-text font-medium">{label}</p>
+          <p className="text-market-up">High: ${data.high}</p>
+          <p className="text-market-down">Low: ${data.low}</p>
+          <p className="text-dark-text">Open: ${data.open}</p>
+          <p className="text-dark-text">Close: ${data.close}</p>
+          <p className="text-market-info">Volume: {formatVolume(data.volume)}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   const latestPrice = getLatestPrice();
   const priceChange = getPriceChange();
 
@@ -127,6 +148,136 @@ const PriceChart: React.FC<PriceChartProps> = ({ symbol, timeframe, isConnected 
       </div>
     );
   }
+
+  const renderChart = () => {
+    switch (chartType) {
+      case 'line':
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis 
+                dataKey="date" 
+                stroke="#94A3B8"
+                fontSize={12}
+                tick={{ fill: '#94A3B8' }}
+              />
+              <YAxis 
+                stroke="#94A3B8"
+                fontSize={12}
+                tick={{ fill: '#94A3B8' }}
+                domain={['dataMin - 5', 'dataMax + 5']}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Line 
+                type="monotone" 
+                dataKey="close" 
+                stroke="#3B82F6" 
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4, fill: '#3B82F6' }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        );
+
+      case 'area':
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <AreaChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis 
+                dataKey="date" 
+                stroke="#94A3B8"
+                fontSize={12}
+                tick={{ fill: '#94A3B8' }}
+              />
+              <YAxis 
+                stroke="#94A3B8"
+                fontSize={12}
+                tick={{ fill: '#94A3B8' }}
+                domain={['dataMin - 5', 'dataMax + 5']}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Area 
+                type="monotone" 
+                dataKey="close" 
+                stroke="#3B82F6" 
+                fill="#3B82F6"
+                fillOpacity={0.3}
+                strokeWidth={2}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        );
+
+      case 'candlestick':
+      default:
+        return (
+          <ResponsiveContainer width="100%" height={400}>
+            <ComposedChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis 
+                dataKey="date" 
+                stroke="#94A3B8"
+                fontSize={10}
+                tick={{ fill: '#94A3B8' }}
+              />
+              <YAxis 
+                stroke="#94A3B8"
+                fontSize={10}
+                tick={{ fill: '#94A3B8' }}
+                domain={['dataMin - 5', 'dataMax + 5']}
+              />
+              {showVolume && (
+                <YAxis 
+                  yAxisId={1}
+                  orientation="right"
+                  stroke="#3B82F6"
+                  fontSize={10}
+                  tick={{ fill: '#3B82F6' }}
+                />
+              )}
+              <Tooltip content={<CustomTooltip />} />
+              
+              {/* Candlestick wicks */}
+              <Bar 
+                dataKey="high" 
+                fill="transparent" 
+                stroke="#94A3B8" 
+                strokeWidth={1}
+                stackId="candlestick"
+              />
+              <Bar 
+                dataKey="low" 
+                fill="transparent" 
+                stroke="#94A3B8" 
+                strokeWidth={1}
+                stackId="candlestick"
+              />
+              
+              {/* Candlestick bodies */}
+              <Bar 
+                dataKey="close" 
+                fill="#10B981"
+                stroke="none"
+                stackId="candlestick"
+              />
+              
+              {/* Volume bars */}
+              {showVolume && (
+                <Bar 
+                  dataKey="volume" 
+                  fill="#3B82F6" 
+                  fillOpacity={0.3}
+                  yAxisId={1}
+                />
+              )}
+            </ComposedChart>
+          </ResponsiveContainer>
+        );
+    }
+  };
 
   return (
     <div className="market-card">
@@ -168,7 +319,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ symbol, timeframe, isConnected 
             }`}
             title={showVolume ? 'Hide Volume' : 'Show Volume'}
           >
-            {showVolume ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            {showVolume ? <RefreshCw className="w-4 h-4" /> : <RefreshCw className="w-4 h-4" />}
           </button>
           
           <button
@@ -217,77 +368,13 @@ const PriceChart: React.FC<PriceChartProps> = ({ symbol, timeframe, isConnected 
         {/* Connection Status Overlay */}
         {!isConnected && (
           <div className="absolute top-4 right-4 z-10 bg-market-down/90 text-white px-3 py-1 rounded-lg text-sm">
-            Disconnected
+            {isMockMode ? 'Simulated Mode' : 'Disconnected'}
           </div>
         )}
         
-        {/* Chart Placeholder */}
-        <div className="bg-dark-bg-secondary rounded-lg p-8 text-center">
-          <div className="w-full h-96 bg-gradient-to-br from-dark-bg-secondary to-dark-bg rounded-lg border border-dark-border relative overflow-hidden">
-            {/* Mock Candlestick Chart */}
-            <div className="absolute inset-0 p-4">
-              <div className="flex items-end justify-between h-full space-x-1">
-                {chartData.slice(-20).map((candle, index) => {
-                  const isUp = candle.close >= candle.open;
-                  const height = Math.abs(candle.close - candle.open) * 10;
-                  const maxHeight = 100;
-                  const normalizedHeight = Math.min(height, maxHeight);
-                  
-                  return (
-                    <div key={index} className="flex flex-col items-center space-y-1">
-                      {/* Wick */}
-                      <div className={`w-0.5 h-8 ${isUp ? 'bg-market-up' : 'bg-market-down'}`}></div>
-                      
-                      {/* Body */}
-                      <div 
-                        className={`w-3 rounded-sm ${
-                          isUp ? 'bg-market-up' : 'bg-market-down'
-                        }`}
-                        style={{ height: `${normalizedHeight}px` }}
-                      ></div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            
-            {/* Volume Bars */}
-            {showVolume && (
-              <div className="absolute bottom-0 left-0 right-0 h-16 bg-dark-bg/50">
-                <div className="flex items-end justify-between h-full space-x-1 px-4 pb-2">
-                  {chartData.slice(-20).map((candle, index) => {
-                    const volumeHeight = (candle.volume / 1000000) * 50;
-                    return (
-                      <div
-                        key={index}
-                        className="w-3 bg-market-info/30 rounded-sm"
-                        style={{ height: `${volumeHeight}px` }}
-                      ></div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            
-            {/* Technical Indicators Overlay */}
-            {showIndicators && (
-              <div className="absolute top-4 left-4 space-y-2">
-                <div className="bg-market-up/20 text-market-up px-2 py-1 rounded text-xs">
-                  SMA(20): ${(chartData.slice(-20).reduce((sum, c) => sum + c.close, 0) / 20).toFixed(2)}
-                </div>
-                <div className="bg-market-alert/20 text-market-alert px-2 py-1 rounded text-xs">
-                  RSI: {(Math.random() * 40 + 30).toFixed(1)}
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="mt-4 text-dark-text-secondary">
-            <p className="text-sm">Interactive chart with {chartData.length} data points</p>
-            <p className="text-xs mt-1">
-              {showVolume && 'Volume bars enabled'} • {showIndicators && 'Technical indicators visible'}
-            </p>
-          </div>
+        {/* Real Chart */}
+        <div className="bg-dark-bg-secondary rounded-lg p-4">
+          {renderChart()}
         </div>
       </div>
 

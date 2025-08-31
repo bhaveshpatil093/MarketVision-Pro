@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Clock, 
-  TrendingUp, 
-  TrendingDown, 
-  Filter, 
-  Download,
+  Activity, 
   RefreshCw,
   Settings,
-  Activity
+  Download,
+  Clock
 } from 'lucide-react';
 
 interface TimeSalesProps {
